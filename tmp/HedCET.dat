@@ -1,0 +1,3 @@
+a:14:{s:24:"refresh_token_expires_in";s:1:"0";s:16:"api_product_list";s:10:"[ops-prod]";s:21:"api_product_list_json";s:18:"
+    "ops-prod"
+  ";s:17:"organization_name";s:3:"epo";s:15:"developer.email";s:14:"uzi@synpat.com";s:10:"token_type";s:11:"BearerToken";s:9:"issued_at";s:13:"1628887858136";s:9:"client_id";s:32:"9Xx2YnGvcjhCkeGLFAyVJLJgZSuaPjYs";s:12:"access_token";s:28:"M48kucZkpq3pI00MmZjc2KkSOwAB";s:16:"application_name";s:36:"76efefdb-6937-4850-9248-3033ad31349e";s:5:"scope";s:4:"core";s:10:"expires_in";s:4:"1199";s:13:"refresh_count";s:1:"0";s:6:"status";s:8:"approved";}

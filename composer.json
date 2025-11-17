@@ -1,0 +1,6 @@
+{
+    "require": {
+        "pusher/pusher-php-server": "^7.0",
+        "smalot/pdfparser": "^2.2"
+    }
+}
