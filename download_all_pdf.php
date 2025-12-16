@@ -20,7 +20,7 @@ $con = new mysqli($host, $user, $password, $dbUSPTO);
 $bucket = 'static.patentrack.com';
 $region = 'us-west-1';
 $keyPrefix = 'assignments/var/www/html/beta/resources/shared/data/';
-$localDIR = '/mnt2/data/s3_bucket/';
+$localDIR = '/mnt2/data/s3/';
 
 /*$credentials = new Credentials(getenv('AWS_ACCESS_KEY_ID'), getenv('AWS_SECRET_KEY'));*/
 
@@ -80,6 +80,7 @@ function fileGetContent($fileName, $bucket, $keyPrefix, $client) {
 }
 
 function fileUpload($fileData, $fileName, $options, $bucket, $keyPrefix, $client, $region) {	
+	global $localDIR;
 	$fileLocation = "";
 	try{
 		/**
@@ -156,7 +157,8 @@ function getPDFFile($assList, $region, $bucket, $keyPrefix, $client){
 }
 
 function createSplitFile($content, $fileName, $bucket, $keyPrefix, $client, $region) {
-	$fileCheck = '/var/www/html/beta/resources/shared/data/';
+	global $localDIR;
+	$fileCheck = $localDIR . 'assignments/var/www/html/beta/resources/shared/data/';
 	$f = fopen($fileCheck.$fileName, "w+");
 	fwrite($f, $content);
 	fclose($f);
