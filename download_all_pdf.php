@@ -1,4 +1,4 @@
-<?php 
+	<?php 
 require_once '/var/www/html/trash/s3_bucket/vendor/autoload.php';
 
 use Aws\S3\S3Client;
@@ -20,6 +20,7 @@ $con = new mysqli($host, $user, $password, $dbUSPTO);
 $bucket = 'static.patentrack.com';
 $region = 'us-west-1';
 $keyPrefix = 'assignments/var/www/html/beta/resources/shared/data/';
+$localDIR = '/mnt2/data/s3_bucket/';
 
 /*$credentials = new Credentials(getenv('AWS_ACCESS_KEY_ID'), getenv('AWS_SECRET_KEY'));*/
 
@@ -81,6 +82,14 @@ function fileGetContent($fileName, $bucket, $keyPrefix, $client) {
 function fileUpload($fileData, $fileName, $options, $bucket, $keyPrefix, $client, $region) {	
 	$fileLocation = "";
 	try{
+		/**
+		 * Upload to local dir first
+		 */
+		$filePath = $localDIR . $keyPrefix.$fileName;
+		file_put_contents($filePath, $fileData);
+		/**
+		 * Create object for s3
+		 */
 		$result = $client->putObject([
 			'Key'    => $keyPrefix.$fileName,
 			'Bucket' => $bucket,
@@ -98,12 +107,18 @@ function fileUpload($fileData, $fileName, $options, $bucket, $keyPrefix, $client
 }
 
 function getPDFFile($assList, $region, $bucket, $keyPrefix, $client){
+	/**
+	 * New url updated 
+	 * https://assignmentcenter.uspto.gov/ipas/search/api/v2/public/download/patent/65771/424
+	 */
 	$fileName = 'assignment-pat-'.$assList->reel_no.'-'.$assList->frame_no.'.pdf';
 	$fileLocation = ''; $content = '';	
 	if(fileCheck($fileName, $bucket, $keyPrefix, $client) === false){
 		echo "FILE NOT FOUND :".$fileName."<br/>";
 		try{
-			$content = file_get_contents('http://legacy-assignments.uspto.gov/assignments/'.$fileName);
+			$url = "https://assignmentcenter.uspto.gov/ipas/search/api/v2/public/download/patent/".$assList->reel_no."/".$assList->frame_no;
+			//$content = file_get_contents('http://legacy-assignments.uspto.gov/assignments/'.$fileName);
+			$content = file_get_contents($url);
 			
 			if($content!=""){
 				$fileLocation = fileUpload($content, $fileName,  ['ContentType' => 'application/pdf','ContentDisposition' => 'inline'], $bucket, $keyPrefix, $client, $region);

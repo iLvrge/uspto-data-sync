@@ -1,8 +1,8 @@
 <?php 
 ini_set('max_execution_time', 0);
-$startDate = '2025-06-23';
+$startDate = '2025-06-02';
 $week = 01;
-$endDate = '2025-10-26';
+$endDate = '2025-06-20';
 
 while(1==1) {
 	if(strtotime($startDate) <= strtotime($endDate)){
