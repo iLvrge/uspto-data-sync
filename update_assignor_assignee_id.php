@@ -95,16 +95,85 @@ $dbBusiness = getenv('DB_BUSINESS');
 $dbApplication = getenv('DB_APPLICATION_DB');
 $con = new mysqli($host, $user, $password, $dbUSPTO);
 
-$con->query("TRUNCATE db_uspto.company_temp");
+if ($con->connect_errno) {
+    throw new Exception('MySQL Connection failed: ' . $con->connect_error);
+}
 
+// Empty target table
+//$con->query("TRUNCATE TABLE db_uspto.company_temp");
 
-
+// Single insert query
+/*
 $query = "INSERT INTO db_uspto.company_temp(name, instances) SELECT or_name, count(or_name) as instances FROM db_uspto.assignor GROUP BY or_name";
 $con->query($query);
-	
+        
 $query = "INSERT INTO db_uspto.company_temp(name, instances) SELECT ee_name, count(ee_name) as instances FROM db_uspto.assignee GROUP BY ee_name";
 
 $con->query($query);
+
+if (!$con->query($sql)) {
+    throw new Exception('Insert failed: ' . $con->error);
+}
+*/
+// Reliable row count
+/*
+$res = $con->query("SELECT ROW_COUNT() AS cnt");
+$inserted = (int) $res->fetch_assoc()['cnt'];
+
+echo "Total rows inserted: {$inserted}\n";
+*/
+
+$logFile = __DIR__ . '/update_assignor_assignee_id.log';
+
+function logMessage($msg) {
+    global $logFile;
+    $timestamp = date('Y-m-d H:i:s');
+    file_put_contents($logFile, "[$timestamp] $msg" . PHP_EOL, FILE_APPEND);
+}
+
+/**
+ * Helper to run INSERT...SELECT and get inserted row count reliably
+ */
+function runInsertAndCount(mysqli $con, string $sql): int {
+    if (!$con->query($sql)) {
+        throw new Exception('Query failed: ' . $con->error);
+    }
+
+    $res = $con->query("SELECT ROW_COUNT() AS cnt");
+    return (int) $res->fetch_assoc()['cnt'];
+}
+
+/* ---------- Start ---------- */
+try {
+    logMessage("Script started.");
+
+$con->query("TRUNCATE TABLE db_uspto.company_temp");
+
+/* Insert from assignor */
+$sqlAssignor = "
+INSERT INTO db_uspto.company_temp (name, instances)
+SELECT or_name, COUNT(*) AS instances
+FROM db_uspto.assignor
+GROUP BY or_name
+";
+$rows1 = runInsertAndCount($con, $sqlAssignor);
+
+/* Insert from assignee */
+$sqlAssignee = "
+INSERT INTO db_uspto.company_temp (name, instances)
+SELECT ee_name, COUNT(*) AS instances
+FROM db_uspto.assignee
+GROUP BY ee_name
+";
+$rows2 = runInsertAndCount($con, $sqlAssignee);
+
+$totalInserted = $rows1 + $rows2;
+
+logMessage("Rows inserted from assignor: {$rows1}");
+logMessage("Rows inserted from assignee: {$rows2}");
+logMessage("Total rows inserted: {$totalInserted}");
+
+
 
 if(1==1) {
 
@@ -136,7 +205,7 @@ if(1==1) {
 			}
 			
 			if($assignorAndAssigneeID > 0) {
-				echo $assignorAndAssigneeID."<br/>";
+				logMessage("Updated ID: " . $assignorAndAssigneeID);
 				$con->query("UPDATE assignor SET assignor_and_assignee_id = ".$assignorAndAssigneeID." WHERE (assignor_and_assignee_id = 0 OR  assignor_and_assignee_id IS NULL) AND or_name = '".$con->real_escape_string($rowName->name)."'");
 				
 				$con->query("UPDATE assignee SET assignor_and_assignee_id = ".$assignorAndAssigneeID." WHERE (assignor_and_assignee_id = 0 OR assignor_and_assignee_id = '') AND ee_name = '".$con->real_escape_string($rowName->name)."'");
@@ -144,6 +213,10 @@ if(1==1) {
 		}
 		$con->query("TRUNCATE db_uspto.company_temp");
 	}
+}
+
+} catch (Exception $e) {
+    logMessage("CRITICAL ERROR: " . $e->getMessage());
 }
 
 
