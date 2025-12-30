@@ -99,6 +99,10 @@ if ($con->connect_errno) {
     throw new Exception('MySQL Connection failed: ' . $con->connect_error);
 }
 
+if (!$con->set_charset("utf8mb4")) {
+    throw new Exception("Error loading character set utf8mb4: " . $con->error);
+}
+
 // Empty target table
 //$con->query("TRUNCATE TABLE db_uspto.company_temp");
 
