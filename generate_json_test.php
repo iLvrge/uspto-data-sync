@@ -343,6 +343,10 @@ if (mysqli_connect_errno()) {
 				
 				$resultDocument = $con->query($queryDocument);
 				
+				echo "<pre>";
+				print_r($resultDocument);
+				echo "</pre>";
+				die;
 				$increment = 1;
 				$relation_increment = 1;
 				$lead_patent_assignment = array();
@@ -448,7 +452,7 @@ if (mysqli_connect_errno()) {
 					
 						$queryAssignor = "SELECT a.*, aaa.name, r.representative_name as normalize_name FROM assignor as a LEFT JOIN assignor_and_assignee as aaa ON aaa.assignor_and_assignee_id = a.assignor_and_assignee_id LEFT JOIN representative as r ON r.representative_id = aaa.representative_id WHERE a.rf_id = ".$doc->rf_id."  GROUP BY a.rf_id, a.assignor_and_assignee_id";
 						
-						/*echo $queryAssignor."<br/>";*/
+						echo $queryAssignor."<br/>";
 						
 						$resultAssignor = $con->query($queryAssignor);							
 						
@@ -470,13 +474,15 @@ if (mysqli_connect_errno()) {
 							array_push($allRFIDs, $doc->rf_id);
 						}
 					} 
-
+echo "<pre>";
+print_r($documentList);
+die;
 					/**
 					 * Shuffle rfID
 					 * If Execution date is same with previous rf ID and Previous Assignor name is same as RFID Asignee name swap row
 					 */
 
-					if(count($documentList) > 0) {
+					if(count($c) > 0) {
 						for($i = 1; $i < count($documentList); $i++) {
 							/**
 							 * Check Execution Date of the transaction
@@ -527,12 +533,10 @@ if (mysqli_connect_errno()) {
 						if(substr($grantInventorApp, 0, 1) == '0'){
 							$grantInventorApp = substr($grantInventorApp, 1);
 						}
-						$queryBiblioInventor = "SELECT inv.*, r.representative_name  as normalize_name  FROM db_patent_application_bibliographic.inventor AS inv INNER JOIN db_patent_application_bibliographic.assignor_and_assignee AS aaa ON aaa.assignor_and_assignee_id = inv.assignor_and_assignee_id LEFT JOIN db_uspto.representative AS r ON r.representative_id = aaa.representative_id WHERE appno_doc_num = '".$grantInventorApp."' GROUP BY aaa.name";
+						$queryBiblioInventor = "SELECT inv.*, r.representative_name  as normalize_name  FROM db_patent_application_bibliographic.inventor AS inv INNER JOIN db_patent_application_bibliographic.assignor_and_assignee AS aaa ON aaa.assignor_and_assignee_id = inv.assignor_and_assignee_id LEFT JOIN db_uspto.representative AS	 r ON r.representative_id = aaa.representative_id WHERE appno_doc_num = '".$grantInventorApp."' GROUP BY aaa.name";
 						
 						$resultBiblioInventor = $con->query($queryBiblioInventor);
 						
-						echo $queryBiblioInventor;
-						die;
 						if($resultBiblioInventor && $resultBiblioInventor->num_rows == 0) {
 							$queryBiblioInventor = "SELECT inv.*, r.representative_name  as normalize_name  FROM db_patent_grant_bibliographic.inventor_new AS inv LEFT JOIN db_patent_application_bibliographic.assignor_and_assignee AS aaa ON aaa.assignor_and_assignee_id = inv.assignor_and_assignee_id LEFT JOIN db_uspto.representative AS r ON r.representative_id = aaa.representative_id  WHERE appno_doc_num = '".$applicationNumber."' GROUP BY aaa.name";
 							$resultBiblioInventor = $con->query($queryBiblioInventor);
@@ -584,8 +588,6 @@ if (mysqli_connect_errno()) {
 							}
 						}
 					} 
-
-
 					/*Get Inventor List RFID*/
 					if(count($inventorNames) == 0 && count($allRFIDs) > 0) {
 						$queryInventor = "SELECT acc.or_name, r.representative_name as normalize_name, acc.exec_dt FROM representative_assignment_conveyance as c INNER JOIN assignor as acc ON acc.rf_id = c.rf_id LEFT JOIN assignor_and_assignee as aaa ON aaa.assignor_and_assignee_id = acc.assignor_and_assignee_id LEFT JOIN representative as r ON r.representative_id = aaa.representative_id WHERE c.rf_id IN (".implode(',', $allRFIDs).") AND c.convey_ty IN ('assignment', 'employee', 'partialassignment', 'correct') AND c.employer_assign = 1 GROUP BY or_name, normalize_name ORDER BY acc.exec_dt ASC";
@@ -609,10 +611,7 @@ if (mysqli_connect_errno()) {
 					}
 					
 					
-					print_r($inventorNames);
-print_r($biblioInventor);
-print_r($data['inventor_boxes']);
-					die;
+					
 					
 					
 					/*$connectionInventor = array();
@@ -754,7 +753,6 @@ print_r($data['inventor_boxes']);
 											
 											$assignorBoxType = $boxType;
 											$as1 = 0;
-											
 											foreach($assignorList as $assignor) {
 												$cType = 2;
 												
@@ -781,28 +779,31 @@ print_r($data['inventor_boxes']);
 												
 												$entity = findEntity($lead_patent_assignment, $name, array(1));
 												
-												/* echo "NAME: ".$name."<br/>"; */
-												
+												/*echo "<br/>NAME: ".$name."<br/>";*/
+												$findName = false;
 												if(count($entity) > 0){
 													$assignorID = $entity['id'];
 												} else {
 													if(count($inventorNames) > 0) {
-														$checkBiblio = false;
+														$checkBiblio = false; 
 														if(count($biblioInventor) > 0) {
 															if(!in_array($name,$inventorNames)) {
-																
 																foreach($biblioInventor as $bibInventor) {
-
-																	/* echo strtolower($name) .'@@@@'. strtolower($bibInventor['name']) .'@@@@@@'. strtolower($bibInventor['normalize'])."@@@@@<br/>"; */
-
-
-																	if(strtolower($name) == strtolower($bibInventor['name']) || strtolower($name) == strtolower($bibInventor['normalize'])) {
-                                                                        /* echo "ENTERED"; */
+																	if (
+																	    preg_replace('/\s+/', ' ', strtolower(trim($name))) == preg_replace('/\s+/', ' ', strtolower(trim($bibInventor['name']))) ||
+																	    preg_replace('/\s+/', ' ', strtolower(trim($name))) == preg_replace('/\s+/', ' ', strtolower(trim($bibInventor['normalize'])))
+																	) {
+                                                                        
 																		$cType = 0;
 																		$checkBiblio = true;
 																		$name = $bibInventor['normalize'] != '' && $bibInventor['normalize'] != null ? $bibInventor['normalize'] : $bibInventor['name'];
+																		$findName = true;
 																		break;
-																	} else {
+																	}
+																}
+																if(!$findName) {
+																	/*echo "Loop End dint find name ". strtolower($name)."@@<br/>";*/
+																	foreach($biblioInventor as $bibInventor) {
 																		$explodeName = explode(" ", $name);
 																		$start = 0;
 																		/* echo "NAME: ".$bibInventor['name']."<br/>";
@@ -866,8 +867,8 @@ print_r($data['inventor_boxes']);
 																				$name = $bibInventor['name'];
 																				break;
 																			}
-																		} */														
-																	}														
+																		} */												
+																	}
 																}
 															}
 														}
@@ -875,8 +876,10 @@ print_r($data['inventor_boxes']);
 															$cType = 0;
 														}
 													}
-                                                    /* echo "NAME: ".$name."<br/>"; */
+                                                    /*echo "<br/>NAME: ".$name."<br/>";*/
 													$entity = findEntity($lead_patent_assignment, $name, array(0));
+													/*echo "<pre>";
+													print_r($entity);*/
 													if(count($entity) > 0){
 														$assignorID = $entity['id'];
 													} else {
@@ -1101,7 +1104,7 @@ print_r($data['inventor_boxes']);
 								$counter++;
 							endif;
 						}
-					}
+					} 
 					
 					if(count($data['box']) > 0){
 						$boxesShuffle = array();
@@ -1116,10 +1119,9 @@ print_r($data['inventor_boxes']);
 							if($boxType >= 0){
 								$inc = $b+1 ;
 								if($inc < count($data['box'])) {
-									$nextItem = $data['box'][$inc];
-	
-									if($boxType == 5 && strtotime($data['box'][$b]['other_execution_date']) == strtotime($nextItem['execution_date'])){
-										if($data['box'][$b]['name'] == $nextItem['name'] && $data['box'][$b]['description'] == $nextItem['description']) {
+									$nextItem = $data['box'][$inc]; 
+									if($boxType == 5 && $data['box'][$b]['name'] == $nextItem['name'] && strtotime($data['box'][$b]['other_execution_date']) == strtotime($nextItem['execution_date'])){
+										//if($data['box'][$b]['description'] == $nextItem['description']) {
 											$ID = $data['box'][$b]['id'];
 											$data['box'][$b] = $nextItem;
 
@@ -1129,7 +1131,7 @@ print_r($data['inventor_boxes']);
 
 											
 											
-										}
+										//}
 									}
 								}
 							}
@@ -1151,8 +1153,8 @@ print_r($data['inventor_boxes']);
 								array_push($data['box'], $array);
 							}
 							
-						}
-						
+						} 
+
 						for($b=0;$b<count($data['box']);$b++){
 							$boxType = -1;
 							if(is_array($data['box'][$b])){
