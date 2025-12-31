@@ -334,12 +334,7 @@ if (mysqli_connect_errno()) {
 				$thirdPartyBoxID = findBoxType("3rdParties", $boxes);
 				
 				$resultDocument = $con->query($queryDocument);
-				
-				echo "<pre>";
-				echo $queryDocument;
-				print_r($resultDocument);
-				echo "</pre>";
-				die;
+			
 				$increment = 1;
 				$relation_increment = 1;
 				$lead_patent_assignment = array();
@@ -347,7 +342,10 @@ if (mysqli_connect_errno()) {
 				
 				
 				if($resultDocument && $resultDocument->num_rows == 0 && !isset($_REQUEST['f'])) {
-					
+					echo "<pre>";
+					echo "Inside condition";
+					echo "</pre>";
+					die;
 					$queryDocument = "SELECT d.*, a.exec_dt, ass.rf_id, ass.frame_no, ass.reel_no, ass.convey_text, ass.record_dt, ac.convey_ty, ass.page_count, ass.cname, ass.caddress_1, ass.caddress_2, ass.status as assignment_status FROM documentid as d INNER JOIN assignor as a ON a.rf_id = d.rf_id INNER JOIN assignment as ass ON ass.rf_id = d.rf_id INNER JOIN representative_assignment_conveyance as ac ON ac.rf_id = ass.rf_id WHERE d.appno_doc_num = '".$patentNumber."' ";
 					
 					/*if(isset($_REQUEST['o']) && $_REQUEST['o'] > 0) {
