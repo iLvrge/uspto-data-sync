@@ -335,7 +335,8 @@ if (mysqli_connect_errno()) {
 
 				echo "<pre>";
 				echo $queryDocument;
-				print_r($_REQUEST);
+				print_r($inventorBoxID);
+				print_r($thirdPartyBoxID);
 				echo "</pre>";
 				die;
 				
