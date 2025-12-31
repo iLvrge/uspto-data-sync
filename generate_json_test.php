@@ -12,6 +12,11 @@ $con = new mysqli('localhost', 'db_user_all', 'wDv%5tgn0O0kMkMN', 'db_uspto');
 header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Credentials: true");
 
+echo "<pre>";
+print_r($_REQUEST);
+echo "</pre>";
+die;
+
 if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
 
         if (isset($_SERVER['HTTP_ACCESS_CONTROL_REQUEST_METHOD']))
