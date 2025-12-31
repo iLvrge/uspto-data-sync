@@ -305,10 +305,6 @@ if (mysqli_connect_errno()) {
 				$data['comment'] = '';
 				/*Find comments against patents*/
 				
-				echo "<pre>";
-				print_r($_REQUEST);
-				echo "</pre>";
-				die;
 				/*Get List of all RFID for patent*/
 				$assetType = 4;
 				
@@ -331,17 +327,17 @@ if (mysqli_connect_errno()) {
 					$queryDocument .= " AND d.rf_id IN (SELECT rf_id FROM list2 WHERE organisation_id = ".$_REQUEST['o'].") ";
 				}*/
 				
-				
-				
-				
 				$queryDocument .= " GROUP BY d.rf_id ORDER BY a.exec_dt ASC, ass.record_dt ASC";
-				
-
-				
 				
 				$inventorBoxID = findBoxType("Inventor", $boxes);
 				
 				$thirdPartyBoxID = findBoxType("3rdParties", $boxes);
+
+				echo "<pre>";
+				echo $queryDocument;
+				print_r($_REQUEST);
+				echo "</pre>";
+				die;
 				
 				$resultDocument = $con->query($queryDocument);
 				
