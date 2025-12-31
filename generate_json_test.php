@@ -332,17 +332,11 @@ if (mysqli_connect_errno()) {
 				$inventorBoxID = findBoxType("Inventor", $boxes);
 				
 				$thirdPartyBoxID = findBoxType("3rdParties", $boxes);
-
-				echo "<pre>";
-				echo $queryDocument;
-				print_r($inventorBoxID);
-				print_r($thirdPartyBoxID);
-				echo "</pre>";
-				die;
 				
 				$resultDocument = $con->query($queryDocument);
 				
 				echo "<pre>";
+				echo $queryDocument;
 				print_r($resultDocument);
 				echo "</pre>";
 				die;
