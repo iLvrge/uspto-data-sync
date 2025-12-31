@@ -342,10 +342,6 @@ if (mysqli_connect_errno()) {
 				
 				
 				if($resultDocument && $resultDocument->num_rows == 0 && !isset($_REQUEST['f'])) {
-					echo "<pre>";
-					echo "Inside condition";
-					echo "</pre>";
-					die;
 					$queryDocument = "SELECT d.*, a.exec_dt, ass.rf_id, ass.frame_no, ass.reel_no, ass.convey_text, ass.record_dt, ac.convey_ty, ass.page_count, ass.cname, ass.caddress_1, ass.caddress_2, ass.status as assignment_status FROM documentid as d INNER JOIN assignor as a ON a.rf_id = d.rf_id INNER JOIN assignment as ass ON ass.rf_id = d.rf_id INNER JOIN representative_assignment_conveyance as ac ON ac.rf_id = ass.rf_id WHERE d.appno_doc_num = '".$patentNumber."' ";
 					
 					/*if(isset($_REQUEST['o']) && $_REQUEST['o'] > 0) {
@@ -465,9 +461,6 @@ if (mysqli_connect_errno()) {
 							array_push($allRFIDs, $doc->rf_id);
 						}
 					} 
-echo "<pre>";
-print_r($documentList);
-die;
 					/**
 					 * Shuffle rfID
 					 * If Execution date is same with previous rf ID and Previous Assignor name is same as RFID Asignee name swap row
