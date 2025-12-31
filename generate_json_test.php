@@ -305,6 +305,8 @@ if (mysqli_connect_errno()) {
 				$data['comment'] = '';
 				/*Find comments against patents*/
 				
+				
+				
 				/*Get List of all RFID for patent*/
 				$assetType = 4;
 				
@@ -327,14 +329,20 @@ if (mysqli_connect_errno()) {
 					$queryDocument .= " AND d.rf_id IN (SELECT rf_id FROM list2 WHERE organisation_id = ".$_REQUEST['o'].") ";
 				}*/
 				
+				
+				
+				
 				$queryDocument .= " GROUP BY d.rf_id ORDER BY a.exec_dt ASC, ass.record_dt ASC";
+				
+
+				
 				
 				$inventorBoxID = findBoxType("Inventor", $boxes);
 				
 				$thirdPartyBoxID = findBoxType("3rdParties", $boxes);
 				
 				$resultDocument = $con->query($queryDocument);
-			
+				
 				$increment = 1;
 				$relation_increment = 1;
 				$lead_patent_assignment = array();
@@ -342,6 +350,7 @@ if (mysqli_connect_errno()) {
 				
 				
 				if($resultDocument && $resultDocument->num_rows == 0 && !isset($_REQUEST['f'])) {
+					
 					$queryDocument = "SELECT d.*, a.exec_dt, ass.rf_id, ass.frame_no, ass.reel_no, ass.convey_text, ass.record_dt, ac.convey_ty, ass.page_count, ass.cname, ass.caddress_1, ass.caddress_2, ass.status as assignment_status FROM documentid as d INNER JOIN assignor as a ON a.rf_id = d.rf_id INNER JOIN assignment as ass ON ass.rf_id = d.rf_id INNER JOIN representative_assignment_conveyance as ac ON ac.rf_id = ass.rf_id WHERE d.appno_doc_num = '".$patentNumber."' ";
 					
 					/*if(isset($_REQUEST['o']) && $_REQUEST['o'] > 0) {
@@ -439,7 +448,7 @@ if (mysqli_connect_errno()) {
 					
 						$queryAssignor = "SELECT a.*, aaa.name, r.representative_name as normalize_name FROM assignor as a LEFT JOIN assignor_and_assignee as aaa ON aaa.assignor_and_assignee_id = a.assignor_and_assignee_id LEFT JOIN representative as r ON r.representative_id = aaa.representative_id WHERE a.rf_id = ".$doc->rf_id."  GROUP BY a.rf_id, a.assignor_and_assignee_id";
 						
-						echo $queryAssignor."<br/>";
+						/*echo $queryAssignor."<br/>";*/
 						
 						$resultAssignor = $con->query($queryAssignor);							
 						
@@ -461,12 +470,13 @@ if (mysqli_connect_errno()) {
 							array_push($allRFIDs, $doc->rf_id);
 						}
 					} 
+
 					/**
 					 * Shuffle rfID
 					 * If Execution date is same with previous rf ID and Previous Assignor name is same as RFID Asignee name swap row
 					 */
 
-					if(count($c) > 0) {
+					if(count($documentList) > 0) {
 						for($i = 1; $i < count($documentList); $i++) {
 							/**
 							 * Check Execution Date of the transaction
@@ -517,7 +527,7 @@ if (mysqli_connect_errno()) {
 						if(substr($grantInventorApp, 0, 1) == '0'){
 							$grantInventorApp = substr($grantInventorApp, 1);
 						}
-						$queryBiblioInventor = "SELECT inv.*, r.representative_name  as normalize_name  FROM db_patent_application_bibliographic.inventor AS inv INNER JOIN db_patent_application_bibliographic.assignor_and_assignee AS aaa ON aaa.assignor_and_assignee_id = inv.assignor_and_assignee_id LEFT JOIN db_uspto.representative AS	 r ON r.representative_id = aaa.representative_id WHERE appno_doc_num = '".$grantInventorApp."' GROUP BY aaa.name";
+						$queryBiblioInventor = "SELECT inv.*, r.representative_name  as normalize_name  FROM db_patent_application_bibliographic.inventor AS inv INNER JOIN db_patent_application_bibliographic.assignor_and_assignee AS aaa ON aaa.assignor_and_assignee_id = inv.assignor_and_assignee_id LEFT JOIN db_uspto.representative AS r ON r.representative_id = aaa.representative_id WHERE appno_doc_num = '".$grantInventorApp."' GROUP BY aaa.name";
 						
 						$resultBiblioInventor = $con->query($queryBiblioInventor);
 						
