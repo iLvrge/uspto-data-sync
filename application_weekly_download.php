@@ -33,19 +33,28 @@ print_r($return); */
 chdir('/var/www/html/script');
 
 exec(
-  "/home/uzi/.nvm/versions/node/v22.17.0/bin/node application_read_applicant_assignee_from_xml.js",
+  '/home/uzi/.nvm/versions/node/v22.17.0/bin/node '
+  . '/var/www/html/script/node_modules/env-cmd/bin/env-cmd.js '
+  . '-f /var/www/html/script/.env '
+  . '/var/www/html/script/application_read_applicant_assignee_from_xml.js '
+  . '2>&1',
   $output,
   $return
 );
 print_r($output);
 print_r($return);
 exec(
-  "/home/uzi/.nvm/versions/node/v22.17.0/bin/node read_inventor_from_xml.js",
+  '/home/uzi/.nvm/versions/node/v22.17.0/bin/node '
+  . '/var/www/html/script/node_modules/env-cmd/bin/env-cmd.js '
+  . '-f /var/www/html/script/.env '
+  . '/var/www/html/script/read_inventor_from_xml.js '
+  . '2>&1',
   $output,
   $return
 );
 print_r($output);
 print_r($return);
+
 
 /* chdir('/mnt/volume_sfo2_12/applications/XML2/');
 exec('find . -name "*.XML" -exec mv -t /mnt/volume_sfo2_12/applications/XML/ {} +',$output, $return);
