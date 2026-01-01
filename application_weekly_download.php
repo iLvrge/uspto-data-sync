@@ -1,13 +1,13 @@
 <?php
 
 echo exec("whoami");
-chdir('/mnt/volume_sfo2_12/applications/DOWNLOAD');
+/* chdir('/mnt/volume_sfo2_12/applications/DOWNLOAD');
 //exec('sudo wget https://bulkdata.uspto.gov/data/applications/grant/redbook/2023/I20230502.tar',$output, $return);
 
 //print_r($output);
 //print_r($return);
 
-/* exec('sudo find -iname \*.tar -exec tar -xvf {} \;',$output, $return);
+exec('sudo find -iname \*.tar -exec tar -xvf {} \;',$output, $return);
 
 print_r($output);
 print_r($return);
@@ -32,18 +32,18 @@ print_r($return); */
 
 chdir('/var/www/html/script');
 
-exec('cd /var/www/html/script && node_modules/.bin/env-cmd node application_read_applicant_assignee_from_xml.js',$output, $return);
+exec('sh -c "./node_modules/.bin/env-cmd node application_read_applicant_assignee_from_xml.js 2>&1"', $output, $return);
 print_r($output);
 print_r($return);
-exec('cd /var/www/html/script && node_modules/.bin/env-cmd node read_inventor_from_xml.js',$output, $return);
+exec('sh -c "./node_modules/.bin/env-cmd node read_inventor_from_xml.js 2>&1"', $output, $return);
 print_r($output);
 print_r($return);
 
-chdir('/mnt/volume_sfo2_12/applications/XML2/');
+/* chdir('/mnt/volume_sfo2_12/applications/XML2/');
 exec('find . -name "*.XML" -exec mv -t /mnt/volume_sfo2_12/applications/XML/ {} +',$output, $return);
 
 print_r($output);
-print_r($return);
+print_r($return); */
 
 
 //exec('export AWS_ACCESS_KEY_ID=AKIAYD2CUN6OLDBPT4SY; export AWS_SECRET_ACCESS_KEY=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; export AWS_DEFAULT_REGION=us-west-1; aws s3 cp /mnt/volume_sfo2_12/applications/PNG s3://static.patentrack.com/figures/ --recursive  --acl public-read-write --include "*.png"',$output, $return);
@@ -57,7 +57,7 @@ print_r($return); */
 
 chdir('/mnt/volume_sfo2_12/applications/');
 
-exec('sudo find /mnt/volume_sfo2_12/applications/DOWNLOAD -mindepth 1 -delete');
+exec('find DOWNLOAD -mindepth 1 -delete');
 /* exec('find IMAGES -mindepth 1 -delete');
 exec('find PNG -mindepth 1 -delete'); */
 /* exec('rm -R DOWNLOAD');
