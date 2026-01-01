@@ -1,8 +1,11 @@
 <?php 
 ini_set('max_execution_time', 0);
-$startDate = '2025-06-05';
+$startDate = '2025-06-19';
 $week = 01;
 $endDate = '2026-01-01';
+
+exec('php -f /var/www/html/trash/application_weekly_download.php');
+die;
 
 while(1==1) {
 	if(strtotime($startDate) <= strtotime($endDate)){

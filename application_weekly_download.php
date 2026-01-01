@@ -7,7 +7,7 @@ chdir('/mnt/volume_sfo2_12/applications/DOWNLOAD');
 //print_r($output);
 //print_r($return);
 
-exec('sudo find -iname \*.tar -exec tar -xvf {} \;',$output, $return);
+/* exec('sudo find -iname \*.tar -exec tar -xvf {} \;',$output, $return);
 
 print_r($output);
 print_r($return);
@@ -23,7 +23,7 @@ exec('find . -name "*.TIF" -exec mv -t /mnt/volume_sfo2_12/applications/IMAGES/ 
 
 print_r($output);
 print_r($return);
-chdir('/mnt/volume_sfo2_12/applications/IMAGES/');
+chdir('/mnt/volume_sfo2_12/applications/IMAGES/'); */
 
 /* exec('find . -name "*.TIF" | while read f; do echo "Converting ${f}"; tiff2png ${f}; done',$output, $return);
 exec('find . -name "*.png" -exec mv -t /mnt/volume_sfo2_12/applications/PNG/ {} +',$output, $return);
@@ -32,10 +32,10 @@ print_r($return); */
 
 chdir('/var/www/html/script');
 
-exec('./node_modules/.bin/env-cmd node application_read_applicant_assignee_from_xml.js',$output, $return);
+exec('/var/www/html/script/node_modules/.bin/env-cmd node application_read_applicant_assignee_from_xml.js',$output, $return);
 print_r($output);
 print_r($return);
-exec('./node_modules/.bin/env-cmd node read_inventor_from_xml.js',$output, $return);
+exec('/var/www/html/script/node_modules/.bin/env-cmd node read_inventor_from_xml.js',$output, $return);
 print_r($output);
 print_r($return);
 
@@ -57,7 +57,7 @@ print_r($return); */
 
 chdir('/mnt/volume_sfo2_12/applications/');
 
-exec('find DOWNLOAD -mindepth 1 -delete');
+exec('sudo find /mnt/volume_sfo2_12/applications/DOWNLOAD -mindepth 1 -delete');
 /* exec('find IMAGES -mindepth 1 -delete');
 exec('find PNG -mindepth 1 -delete'); */
 /* exec('rm -R DOWNLOAD');
