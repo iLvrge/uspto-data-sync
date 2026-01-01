@@ -32,10 +32,10 @@ print_r($return); */
 
 chdir('/var/www/html/script');
 
-exec('/var/www/html/script/node_modules/.bin/env-cmd node application_read_applicant_assignee_from_xml.js',$output, $return);
+exec('cd /var/www/html/script && node_modules/.bin/env-cmd node application_read_applicant_assignee_from_xml.js',$output, $return);
 print_r($output);
 print_r($return);
-exec('/var/www/html/script/node_modules/.bin/env-cmd node read_inventor_from_xml.js',$output, $return);
+exec('cd /var/www/html/script && node_modules/.bin/env-cmd node read_inventor_from_xml.js',$output, $return);
 print_r($output);
 print_r($return);
 
