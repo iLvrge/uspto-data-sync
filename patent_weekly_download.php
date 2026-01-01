@@ -17,7 +17,7 @@ print_r($output);
 print_r($return);
 exec('find . -name "*.XML" -exec mv -t /mnt/volume_sfo2_12/patent/XML2/ {} +',$output, $return);
 
-print_r($output);
+/* print_r($output);
 print_r($return);
 exec('find . -name "*.TIF" -exec mv -t /mnt/volume_sfo2_12/patent/IMAGES/ {} +',$output, $return);
 
@@ -27,7 +27,7 @@ chdir('/mnt/volume_sfo2_12/patent/IMAGES/');
 
 exec('find . -name "*.TIF" | while read f; do echo "Converting ${f}"; tiff2png ${f}; done',$output, $return);
 print_r($output);
-print_r($return);
+print_r($return); */
 
 chdir('/var/www/html/script');
 exec('./node_modules/.bin/env-cmd node patent_xml_file_read.js',$output, $return);
@@ -50,7 +50,7 @@ exec('find . -name "*.XML" -exec mv -t /mnt/volume_sfo2_12/patent/XML/ {} +',$ou
 print_r($output);
 print_r($return);
 
-chdir('/mnt/volume_sfo2_12/patent/IMAGES/');
+/* chdir('/mnt/volume_sfo2_12/patent/IMAGES/');
 
 exec('find . -name "*.TIF" | while read f; do echo "Converting ${f}"; tiff2png ${f}; done');
 
@@ -74,8 +74,10 @@ exec('rm -R IMAGES');
 exec('rm -R PNG');
 exec('mkdir DOWNLOAD');
 exec('mkdir IMAGES');
-exec('mkdir PNG');
+exec('mkdir PNG'); */
 
+chdir('/mnt/volume_sfo2_12/patent/');
+exec('sudo find DOWNLOAD -mindepth 1 -delete');
 
 //exec('php -f /var/www/html/trash/insert_unique_applicant_temp.php')
 
