@@ -1,7 +1,7 @@
 <?php
 
 echo exec("whoami");
-/* chdir('/mnt/volume_sfo2_12/applications/DOWNLOAD');
+chdir('/mnt/volume_sfo2_12/applications/DOWNLOAD');
 //exec('sudo wget https://bulkdata.uspto.gov/data/applications/grant/redbook/2023/I20230502.tar',$output, $return);
 
 //print_r($output);
@@ -23,14 +23,14 @@ exec('find . -name "*.TIF" -exec mv -t /mnt/volume_sfo2_12/applications/IMAGES/ 
 
 print_r($output);
 print_r($return);
-chdir('/mnt/volume_sfo2_12/applications/IMAGES/'); */
+chdir('/mnt/volume_sfo2_12/applications/IMAGES/');
 
 /* exec('find . -name "*.TIF" | while read f; do echo "Converting ${f}"; tiff2png ${f}; done',$output, $return);
 exec('find . -name "*.png" -exec mv -t /mnt/volume_sfo2_12/applications/PNG/ {} +',$output, $return);
 print_r($output);
 print_r($return); */
 
-chdir('/var/www/html/script');
+/* chdir('/var/www/html/script');
 
 exec(
   '/home/uzi/.nvm/versions/node/v22.17.0/bin/node '
@@ -53,7 +53,7 @@ exec(
   $return
 );
 print_r($output);
-print_r($return);
+print_r($return); */
 
 
 /* chdir('/mnt/volume_sfo2_12/applications/XML2/');
@@ -74,7 +74,7 @@ print_r($return); */
 
 chdir('/mnt/volume_sfo2_12/applications/');
 
-exec('find DOWNLOAD -mindepth 1 -delete');
+exec('sudo find DOWNLOAD -mindepth 1 -delete');
 /* exec('find IMAGES -mindepth 1 -delete');
 exec('find PNG -mindepth 1 -delete'); */
 /* exec('rm -R DOWNLOAD');
