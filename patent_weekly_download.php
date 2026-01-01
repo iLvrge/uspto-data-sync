@@ -30,17 +30,7 @@ print_r($output);
 print_r($return); */
 
 chdir('/var/www/html/script');
-exec('./node_modules/.bin/env-cmd node patent_xml_file_read.js',$output, $return);
-print_r($output);
-print_r($return);
-exec('./node_modules/.bin/env-cmd node grant_read_lawyer_from_xml.js',$output, $return);
-
-print_r($output);
-print_r($return);
-exec('./node_modules/.bin/env-cmd node grant_read_applicant_assignee_from_xml.js',$output, $return);
-print_r($output);
-print_r($return);
-exec('./node_modules/.bin/env-cmd node grant_extension_xml.js',$output, $return);
+exec('(./node_modules/.bin/env-cmd node patent_xml_file_read.js & ./node_modules/.bin/env-cmd node grant_read_lawyer_from_xml.js & ./node_modules/.bin/env-cmd node grant_read_applicant_assignee_from_xml.js & ./node_modules/.bin/env-cmd node grant_extension_xml.js) & wait',$output, $return);
 print_r($output);
 print_r($return);
 
