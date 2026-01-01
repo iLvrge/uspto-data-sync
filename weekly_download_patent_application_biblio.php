@@ -1,8 +1,8 @@
 <?php 
 ini_set('max_execution_time', 0);
-$startDate = '2025-05-22';
+$startDate = '2025-06-05';
 $week = 01;
-$endDate = '2025-05-22';
+$endDate = '2026-01-01';
 
 while(1==1) {
 	if(strtotime($startDate) <= strtotime($endDate)){
@@ -38,58 +38,53 @@ while(1==1) {
 
 function downloadFile($url, $path, $retry = 0)
 { 
-	echo $url;
+    echo $url . "\n";
     $MAX_RETRY = 5;
-    $SLEEP_AFTER_429 = 1; // seconds 
-	$apiKey = getenv('USPTO_OPEN_API_KEY'); 
-    $headers = [
-        'x-api-key: ' . $apiKey
-    ];
+    $SLEEP_AFTER_429 = 1; 
+    $apiKey = getenv('USPTO_OPEN_API_KEY'); 
 
     $fp = fopen($path, 'w+');
     if ($fp === false) {
-        echo "Failed to open file at $savePath\n";
-        return;
+        echo "Failed to open file at $path\n";
+        exit;
     }
 
     $ch = curl_init($url);
 
     curl_setopt_array($ch, [
         CURLOPT_FILE => $fp,
-        CURLOPT_RETURNTRANSFER => true,
-        CURLOPT_FOLLOWLOCATION => true, // handle 302 redirects
-        CURLOPT_HTTPHEADER => $headers,
-        CURLOPT_HEADER => true, // get headers to check HTTP status
+        CURLOPT_FOLLOWLOCATION => true,
+        CURLOPT_HTTPHEADER => [
+            'x-api-key: ' . $apiKey
+        ],
+        CURLOPT_FAILONERROR => false, // We check HTTP code manually
     ]);
 
-    $response = curl_exec($ch);
-    $headerSize = curl_getinfo($ch, CURLINFO_HEADER_SIZE);
-    $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-
-    $body = substr($response, $headerSize);
+    curl_exec($ch);
 
     if (curl_errno($ch)) {
         echo 'cURL error: ' . curl_error($ch) . "\n";
         curl_close($ch);
-        return false;
+        fclose($fp);
+        exit;
     }
 
+    $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
     curl_close($ch);
+    fclose($fp);
 
     if ($httpCode === 429 && $retry < $MAX_RETRY) {
         echo "429 Too Many Requests — Retrying in {$SLEEP_AFTER_429}s (attempt $retry)\n";
         sleep($SLEEP_AFTER_429);
-        return downloadFile($url, $path, $apiKey, $retry + 1);
+        return downloadFile($url, $path, $retry + 1);
     }
 
     if ($httpCode !== 200) {
         echo "HTTP error $httpCode\n";
-        return false;
-    }
-
-    if (file_put_contents($path, $body) === false) {
-        echo "Failed to save file to $path\n";
-        return false;
+        if (file_exists($path)) {
+            unlink($path); // Delete the partial/error file
+        }
+        exit;
     }
 
     return true;

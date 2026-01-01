@@ -25,9 +25,10 @@ print_r($output);
 print_r($return);
 chdir('/mnt/volume_sfo2_12/applications/IMAGES/');
 
-exec('find . -name "*.TIF" | while read f; do echo "Converting ${f}"; tiff2png ${f}; done',$output, $return);
+/* exec('find . -name "*.TIF" | while read f; do echo "Converting ${f}"; tiff2png ${f}; done',$output, $return);
+exec('find . -name "*.png" -exec mv -t /mnt/volume_sfo2_12/applications/PNG/ {} +',$output, $return);
 print_r($output);
-print_r($return);
+print_r($return); */
 
 chdir('/var/www/html/script');
 
@@ -44,32 +45,27 @@ exec('find . -name "*.XML" -exec mv -t /mnt/volume_sfo2_12/applications/XML/ {} 
 print_r($output);
 print_r($return);
 
-chdir('/mnt/volume_sfo2_12/applications/IMAGES/');
 
-exec('find . -name "*.TIF" | while read f; do echo "Converting ${f}"; tiff2png ${f}; done');
+//exec('export AWS_ACCESS_KEY_ID=AKIAYD2CUN6OLDBPT4SY; export AWS_SECRET_ACCESS_KEY=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; export AWS_DEFAULT_REGION=us-west-1; aws s3 cp /mnt/volume_sfo2_12/applications/PNG s3://static.patentrack.com/figures/ --recursive  --acl public-read-write --include "*.png"',$output, $return);
 
-exec('find . -name "*.png" -exec mv -t /mnt/volume_sfo2_12/applications/PNG/ {} +',$output, $return);
-
-print_r($output);
-print_r($return);
-
-
-exec('export AWS_ACCESS_KEY_ID=AKIAYD2CUN6OLDBPT4SY; export AWS_SECRET_ACCESS_KEY=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; export AWS_DEFAULT_REGION=us-west-1; aws s3 cp /mnt/volume_sfo2_12/applications/PNG s3://static.patentrack.com/figures/ --recursive  --acl public-read-write --include "*.png"',$output, $return);
-
+/* chdir('/mnt/volume_sfo2_12/applications/PNG/');
+exec('find . -name "*.png" -exec mv -t /mnt/data/s3/ {} +',$output, $return);
 
 
 print_r($output);
-print_r($return);
+print_r($return); */
 
 chdir('/mnt/volume_sfo2_12/applications/');
 
-exec('rm -R DOWNLOAD');
+exec('find DOWNLOAD -mindepth 1 -delete');
+/* exec('find IMAGES -mindepth 1 -delete');
+exec('find PNG -mindepth 1 -delete'); */
+/* exec('rm -R DOWNLOAD');
 exec('rm -R IMAGES');
 exec('rm -R PNG');
 exec('mkdir DOWNLOAD');
 exec('mkdir IMAGES');
-exec('mkdir PNG');
-
+exec('mkdir PNG'); */
 
 //exec('php -f /var/www/html/trash/insert_unique_applicant_temp.php')
 
