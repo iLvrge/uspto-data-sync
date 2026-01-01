@@ -1,9 +1,9 @@
 <?php 
 ini_set('max_execution_time', 0);
-$startDate = '2025-05-20';
+$startDate = '2025-05-27';
 $week = 01;
-$endDate = '2025-05-27';
-/*
+$endDate = '2025-12-30';
+
 while(1==1) {
 	if(strtotime($startDate) <= strtotime($endDate)){
 		
@@ -15,7 +15,7 @@ while(1==1) {
 		
 		downloadFile($fileURL, '/mnt/volume_sfo2_12/patent/DOWNLOAD/'.$fileName);
 
-        exec('php -f /var/www/html/trash/patent_weekly_download.php');
+        //exec('php -f /var/www/html/trash/patent_weekly_download.php');
 
 		$date->modify('+7 days');
         $startDate = $date->format('Y-m-d');
@@ -23,9 +23,9 @@ while(1==1) {
 	} else {
 		break;
 	}
-}*/
+}
 
- exec('php -f /var/www/html/trash/patent_weekly_download.php');
+ //exec('php -f /var/www/html/trash/patent_weekly_download.php');
 
 /* function downloadFile($url, $path){
 	echo $url;  
