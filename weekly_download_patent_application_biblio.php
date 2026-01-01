@@ -4,9 +4,6 @@ $startDate = '2025-06-19';
 $week = 01;
 $endDate = '2026-01-01';
 
-exec('php -f /var/www/html/trash/application_weekly_download.php');
-die;
-
 while(1==1) {
 	if(strtotime($startDate) <= strtotime($endDate)){
 		
@@ -18,7 +15,7 @@ while(1==1) {
 		
 		downloadFile($fileURL, '/mnt/volume_sfo2_12/applications/DOWNLOAD/'.$fileName);
 
-        exec('php -f /var/www/html/trash/application_weekly_download.php');
+        //exec('php -f /var/www/html/trash/application_weekly_download.php');
 
 		$date->modify('+7 days');
         $startDate = $date->format('Y-m-d');
