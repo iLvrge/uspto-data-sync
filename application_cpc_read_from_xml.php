@@ -14,7 +14,7 @@ ini_set('display_errors', 1); ini_set('display_startup_errors', 1); error_report
 ini_set('xdebug.max_nesting_level', 1000);
 
 $con = new mysqli($host,$user,$password,$dbGrantBiblio);
-foreach(glob('/mnt/volume_sfo2_12/DOWNLOAD/US_PGPub_CPC_MCF_XML_2025-05-01/*.xml') as $fileName){
+foreach(glob('/mnt/volume_sfo2_12/DOWNLOAD/US_PGPub_CPC_MCF_XML_*/*.xml') as $fileName){
 	echo $fileName."<br/>";
 	$getFileContent = file_get_contents($fileName);
 	
