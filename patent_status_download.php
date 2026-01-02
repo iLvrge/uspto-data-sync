@@ -19,7 +19,7 @@ while(1==1) {
         $fileURL = 'https://api.uspto.gov/api/v1/datasets/products/files/PTFWPRE/2021-2025-patent-filewrapper-full-json-'.$fileName;
         
         downloadFile($fileURL, '/mnt/volume_sfo2_12/STATUS/'.$fileName);
-              
+        exit;
     } else {
         break;
     }
