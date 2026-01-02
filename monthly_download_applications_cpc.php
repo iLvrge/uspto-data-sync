@@ -15,7 +15,7 @@ while(1==1) {
         
         downloadFile($fileURL, '/mnt/volume_sfo2_12/DOWNLOAD/'.$fileName);
 
-        $date->modify('+7 days');
+        $date->modify('+1 month');
         $startDate = $date->format('Y-m-d');
           
     } else {
