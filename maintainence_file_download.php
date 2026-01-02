@@ -13,7 +13,7 @@ while(1==1) {
         $year = $date->format('Y');
         $fileURL = 'https://api.uspto.gov/api/v1/datasets/products/files/PTMNFEE2/MaintFeeEvents_'.$fileName;
         
-        downloadFile($fileURL, '/mnt/volume_sfo2_12/DOWNLOAD/'.$fileName);
+        downloadFile($fileURL, '/mnt/volume_sfo2_12/EVENTS/'.$fileName);
 
         $date->modify('+7 days');
         $startDate = $date->format('Y-m-d');
@@ -22,9 +22,9 @@ while(1==1) {
         break;
     }
 }
-chdir('/mnt/volume_sfo2_12/DOWNLOAD');
+chdir('/mnt/volume_sfo2_12/EVENTS');
 exec('find . -name "*.zip" -exec unzip -o {} \;',$output, $return);
-exec('php -f /var/www/html/trash/maintainence_file.php');
+exec('php -f /var/www/html/trash/maintainaince_file.php');
 
 exec('find . -name "*.zip" -type f -delete');
 
