@@ -88,37 +88,49 @@ try {
 }
 
 function downloadFile($url, $path, $retry = 0)
-{ 
-	echo $url;
+{
     $MAX_RETRY = 5;
-    $SLEEP_AFTER_429 = 1; // seconds 
-	$apiKey = getenv('USPTO_OPEN_API_KEY'); 
+    $SLEEP_AFTER_429 = 1; // seconds
+
+    $apiKey = getenv('USPTO_OPEN_API_KEY');
+    if (!$apiKey) {
+        throw new Exception('USPTO_OPEN_API_KEY not set');
+    }
+
     $headers = [
         'x-api-key: ' . $apiKey
     ];
 
-    $ch = curl_init($url);
+    $fullPath = dirname(__FILE__) . $path;
+    $fp = fopen($fullPath, 'w');
 
+    if (!$fp) {
+        echo "Cannot open file: $fullPath\n";
+        return false;
+    }
+
+    $ch = curl_init($url);
     curl_setopt_array($ch, [
-        CURLOPT_RETURNTRANSFER => true,
-        CURLOPT_FOLLOWLOCATION => true, // handle 302 redirects
+        CURLOPT_FILE => $fp,              // 🔑 stream to file
+        CURLOPT_FOLLOWLOCATION => true,
         CURLOPT_HTTPHEADER => $headers,
-        CURLOPT_HEADER => true, // get headers to check HTTP status
+        CURLOPT_HEADER => false,           // 🔑 no headers in memory
+        CURLOPT_RETURNTRANSFER => false,   // 🔑 no RAM buffering
+        CURLOPT_TIMEOUT => 0,
     ]);
 
-    $response = curl_exec($ch);
-    $headerSize = curl_getinfo($ch, CURLINFO_HEADER_SIZE);
+    curl_exec($ch);
     $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-
-    $body = substr($response, $headerSize);
 
     if (curl_errno($ch)) {
         echo 'cURL error: ' . curl_error($ch) . "\n";
         curl_close($ch);
+        fclose($fp);
         return false;
     }
 
     curl_close($ch);
+    fclose($fp);
 
     if ($httpCode === 429 && $retry < $MAX_RETRY) {
         echo "429 Too Many Requests — Retrying in {$SLEEP_AFTER_429}s (attempt $retry)\n";
@@ -131,13 +143,8 @@ function downloadFile($url, $path, $retry = 0)
         return false;
     }
 
-    $fullPath = dirname(__FILE__) . $path;
-    if (file_put_contents($fullPath, $body) === false) {
-        echo "Failed to save file to $fullPath\n";
-        return false;
-    }
-
     return true;
-} 
+}
+
 
 ?>
