@@ -89,6 +89,7 @@ try {
 
 function downloadFile($url, $path, $retry = 0)
 {
+    echo "DOWNLOAD FILE URL: ".$url. "\n";
     $MAX_RETRY = 5;
     $SLEEP_AFTER_429 = 1; // seconds
 
