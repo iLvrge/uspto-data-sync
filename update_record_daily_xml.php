@@ -6,17 +6,9 @@ ini_set('max_execution_time', 0);
 ini_set('display_errors', 1); 
 ini_set('display_startup_errors', 1); error_reporting(E_ALL); 
 /*ignore_user_abort(true);*/
-ini_set("log_errors", 1);
-ini_set("error_log", "/var/www/html/trash/daily_file.log");
-
 ini_set('xdebug.max_nesting_level', 1000);
-$host = getenv('DB_HOST');
-$user = getenv('DB_USER'); 
-$password = getenv('DB_PASSWORD');
-$dbUSPTO = getenv('DB_USPTO_DB');
-$dbBusiness = getenv('DB_BUSINESS');
-$dbApplication = getenv('DB_APPLICATION_DB');
-$con = new mysqli($host, $user, $password, $dbUSPTO);
+// Include database connection (provides $con, $host, $user, $password, $dbUSPTO and ensureConnection())
+require_once __DIR__ . '/connection.php';
 
 
 $queryConveyType = "Select a.convey_text as text, rac.convey_ty as convey_ty FROM db_uspto.assignment as a  INNER JOIN db_uspto.representative_assignment_conveyance as rac ON rac.rf_id = a.rf_id WHERE a.convey_text <> '' AND a.convey_text IS NOT NULL GROUP BY a.convey_text, convey_ty";
@@ -32,28 +24,31 @@ if($resultAllConveyType && $resultAllConveyType->num_rows > 0) {
 }*/
 $enteredData = false;
 foreach(glob('./dds/*.xml') as $fileName){
+    // Ensure database connection is alive for each file
+    ensureConnection($con, $host, $user, $password, $dbUSPTO);
+    
+    $fileName = realpath($fileName);
 	echo $fileName."<br/>";
-	$getFileContent = file_get_contents($fileName);
-	
-	if($getFileContent) {
-		try{
-			$xml = simplexml_load_string($getFileContent);
-			if ($xml !== false) {
-				
-				$xmlObject = new SimpleXMLElement($getFileContent);	
-				$pathAssignments = $xmlObject->xpath('patent-assignments');
-				$assignmentList = $pathAssignments[0]->xpath('patent-assignment');
-				$assignmentData = array();
-				$assignmentConveyance = array();
-				$assignorsList = array();
-				$assigneesList = array();
-				$documentList = array();
-				$allRFIDs = array();
-				if(count($assignmentList) > 0) {
-					if($enteredData === false) {
-						$enteredData = true;
-					}
-					foreach( $assignmentList as $assignment) {
+    try {
+        $reader = new XMLReader();
+        $reader->open($fileName);
+
+        // Advancing to the first patent-assignment node
+        while ($reader->read()) {
+            if ($reader->nodeType == XMLReader::ELEMENT && $reader->name == 'patent-assignment') {
+                $doc = new DOMDocument();
+                $assignment = simplexml_import_dom($reader->expand($doc));
+                if ($assignment === false) continue;
+
+                // Dummy arrays if needed for compatibility with internal code logic
+                $allRFIDs = array();
+                $documentList = array();
+
+                if ($enteredData === false) {
+                    $enteredData = true;
+                }
+                
+                // The loop logic follows...
 						$assignmentRecord = $assignment->xpath('assignment-record');
 						
 						$reelNo = (string)$assignmentRecord[0]->{'reel-no'};
@@ -540,9 +535,10 @@ foreach(glob('./dds/*.xml') as $fileName){
 							}
 						}	 
 					}
-				}
-				unlink($fileName);
-			}
+            }
+
+			$reader->close();
+			unlink($fileName);
 		} catch(Exception $e ) {
 			error_log( "Errors in update record daily XML!" );
 			error_log( $fileName );
@@ -550,7 +546,7 @@ foreach(glob('./dds/*.xml') as $fileName){
 			$f = fopen("/var/www/html/trash/daily_file.log", "w+");
 			fwrite($f, $fileName);
 		}
-	}
+
 }
 if($enteredData === true) {  
 	$con->query("TRUNCATE db_uspto.company_temp");
