@@ -7,8 +7,8 @@ ini_set('display_startup_errors', 1);
 error_reporting(E_WARNING);
 error_reporting(E_ALL);
 error_reporting(-1);
-//$con = new mysqli('localhost', 'db_user_all', 'wDv%5tgn0O0kMkMN', 'db_application');
-$con = new mysqli('localhost', 'db_user_all', 'wDv%5tgn0O0kMkMN', 'db_uspto');
+require_once __DIR__ . '/connection.php';
+
 header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Credentials: true");
 
@@ -215,9 +215,6 @@ function remove_if_trailing($haystack, $needle)
     return array(trim(ucwords(strtolower($haystack))), $lp);
 }
 
-if (mysqli_connect_errno()) {	
-  exit();  
-} else {
 	if(isset($_REQUEST['p']) && $_REQUEST['p'] != ''){
 		$serverPath = '/var/www/html/PatenTrack/resources/shared/data/';
 		$patentNumber = trim($_REQUEST['p']);
@@ -1550,7 +1547,7 @@ if (mysqli_connect_errno()) {
 			}
 		}
 	}
-}
+
 
 function formatNumber ($string) {
 	return preg_replace("/\B(?=(\d{3})+(?!\d))/", ",", $string);
