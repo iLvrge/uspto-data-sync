@@ -4,21 +4,52 @@ ignore_user_abort(true);
 ini_set('xdebug.max_nesting_level', 1000);
 ini_set("memory_limit","256M");
 
-$db = array();
+$dotenv = parse_ini_file(__DIR__ . '/.env');
 
-$db['default']['hostname'] = '167.172.195.92';
-$db['default']['username'] = 'patent_user';
-$db['default']['password'] = 'P@t3nt@u5r';
-$db['default']['database'] = 'db_patentrack';
+$host = $dotenv['DB_HOST'];
+$user = $dotenv['DB_USER']; 
+$password = $dotenv['DB_PASS'];
+$dbUSPTO = $dotenv['DB_NAME'];
 
-$con = mysqli_connect($db['default']['hostname'],$db['default']['username'],$db['default']['password'],$db['default']['database']);
+// Daily Logging setup
+$logDir = __DIR__ . '/log';
+if (!is_dir($logDir)) {
+    mkdir($logDir, 0777, true);
+}
+$logFile = $logDir . '/' . date('Y-m-d') . '.log';
+ini_set("log_errors", 1);
+ini_set("error_log", $logFile);
 
-if((int)mysqli_errno($con)==0){
-	mysqli_set_charset($con, 'utf8'); // <- add this too
-	mysqli_query($con, "SET NAMES 'utf8';");
-	mysqli_query($con, "SET CHARACTER SET 'utf8';");
-	mysqli_query($con, "SET COLLATION_CONNECTION = 'utf8_unicode_ci';");
-} else {
-	die("Error");
+/**
+ * Ensure database connection is alive, reconnect if needed
+ */
+function ensureConnection(&$con, $host, $user, $password, $database) {
+    if ($con === null || (is_object($con) && $con->connect_errno) || !@$con->ping()) {
+        error_log("Connection lost or not established. Attempting to connect/reconnect...");
+        // Close existing connection if it exists
+        if ($con !== null && is_object($con)) {
+            @$con->close();
+        }
+        // Create new connection
+        $con = new mysqli($host, $user, $password, $database);
+        if ($con->connect_errno) {
+            error_log("CRITICAL: Failed to connect to MySQL: " . $con->connect_error);
+            return false;
+        }
+        mysqli_set_charset($con, 'utf8');
+        mysqli_query($con, "SET NAMES 'utf8';");
+        mysqli_query($con, "SET CHARACTER SET 'utf8';");
+        mysqli_query($con, "SET COLLATION_CONNECTION = 'utf8_unicode_ci';");
+        error_log("Database connection established/re-established successfully");
+    }
+    return true;
+}
+
+/**
+ * Create initial database connection
+ */
+$con = null;
+if (!ensureConnection($con, $host, $user, $password, $dbUSPTO)) {
+    die("CRITICAL: Initial database connection failed. Check logs at " . $logFile);
 }
 ?>
