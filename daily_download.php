@@ -1,5 +1,6 @@
 <?php 
 ini_set('max_execution_time', 0);
+ini_set('memory_limit', '1024M');
 
 // Include database connection and tracking helper
 require_once __DIR__ . '/connection.php';
@@ -88,50 +89,37 @@ try {
 }
 
 function downloadFile($url, $path, $retry = 0)
-{
-    echo "DOWNLOAD FILE URL: ".$url. "\n";
+{ 
+	echo "DOWNLOAD FILE URL: ".$url. "\n";
     $MAX_RETRY = 5;
-    $SLEEP_AFTER_429 = 1; // seconds
-
-    $apiKey = getenv('USPTO_OPEN_API_KEY');
-    if (!$apiKey) {
-        throw new Exception('USPTO_OPEN_API_KEY not set');
-    }
-
+    $SLEEP_AFTER_429 = 1; // seconds 
+	$apiKey = getenv('USPTO_OPEN_API_KEY'); 
     $headers = [
         'x-api-key: ' . $apiKey
     ];
 
-    $fullPath = dirname(__FILE__) . $path;
-    $fp = fopen($fullPath, 'w');
-
-    if (!$fp) {
-        echo "Cannot open file: $fullPath\n";
-        return false;
-    }
-
     $ch = curl_init($url);
+
     curl_setopt_array($ch, [
-        CURLOPT_FILE => $fp,              // 🔑 stream to file
-        CURLOPT_FOLLOWLOCATION => true,
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_FOLLOWLOCATION => true, // handle 302 redirects
         CURLOPT_HTTPHEADER => $headers,
-        CURLOPT_HEADER => false,           // 🔑 no headers in memory
-        CURLOPT_RETURNTRANSFER => false,   // 🔑 no RAM buffering
-        CURLOPT_TIMEOUT => 0,
+        CURLOPT_HEADER => true, // get headers to check HTTP status
     ]);
 
-    curl_exec($ch);
+    $response = curl_exec($ch);     
+    $headerSize = curl_getinfo($ch, CURLINFO_HEADER_SIZE);
     $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+
+    $body = substr($response, $headerSize);
 
     if (curl_errno($ch)) {
         echo 'cURL error: ' . curl_error($ch) . "\n";
         curl_close($ch);
-        fclose($fp);
         return false;
     }
 
     curl_close($ch);
-    fclose($fp);
 
     if ($httpCode === 429 && $retry < $MAX_RETRY) {
         echo "429 Too Many Requests — Retrying in {$SLEEP_AFTER_429}s (attempt $retry)\n";
@@ -144,8 +132,13 @@ function downloadFile($url, $path, $retry = 0)
         return false;
     }
 
-    return true;
-}
+    $fullPath = dirname(__FILE__) . $path;
+    if (file_put_contents($fullPath, $body) === false) {
+        echo "Failed to save file to $fullPath\n";
+        return false;
+    }
 
+    return true;
+} 
 
 ?>
