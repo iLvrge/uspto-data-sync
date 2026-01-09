@@ -23,6 +23,59 @@ if($resultAllConveyType && $resultAllConveyType->num_rows > 0) {
 	}
 }*/
 $enteredData = false;
+
+function getXpathValue($node, $xpath, $attribute = null, $default = null, $contextInfo = '') {
+    $result = $node->xpath($xpath);
+    if (empty($result)) {
+        logXmlIssue("XPath returned empty", $xpath, $attribute, $node, $contextInfo);
+        return $default;
+    }
+    
+    if ($attribute !== null) {
+        // Try both -> and attribute access methods
+        $value = null;
+        
+        if (isset($result[0]->{$attribute})) {
+            $value = (string)$result[0]->{$attribute};
+        } elseif (isset($result[0][$attribute])) {
+            $value = (string)$result[0][$attribute];
+        } else {
+            logXmlIssue("Attribute not found", $xpath, $attribute, $node, $contextInfo);
+            return $default;
+        }
+        
+        return $value;
+    }
+    
+    return (string)$result[0];
+}
+
+function logXmlIssue($issue, $xpath, $attribute, $node, $contextInfo) {
+    $logFile = dirname(__FILE__) . '/xml_issues.log';
+    
+    $logEntry = [
+        'timestamp' => date('Y-m-d H:i:s'),
+        'issue' => $issue,
+        'xpath' => $xpath,
+        'attribute' => $attribute,
+        'context' => $contextInfo,
+        'xml_snippet' => $node->asXML(), // Captures the actual XML node
+        '---' => str_repeat('-', 80)
+    ];
+    
+    $logText = "";
+    foreach ($logEntry as $key => $value) {
+        if ($key === '---') {
+            $logText .= $value . "\n";
+        } else {
+            $logText .= strtoupper($key) . ": " . $value . "\n";
+        }
+    }
+    $logText .= "\n";
+    
+    file_put_contents($logFile, $logText, FILE_APPEND);
+}
+
 foreach(glob('./dds/*.xml') as $fileName){
     // Ensure database connection is alive for each file
     ensureConnection($con, $host, $user, $password, $dbUSPTO);
@@ -174,8 +227,22 @@ foreach(glob('./dds/*.xml') as $fileName){
 								$assignor_and_assigneeID = $rowData->assignor_and_assignee_id;
 							}*/
 							
-							$executionDate = (string)$assignor->xpath('execution-date')[0]->{'date'};
-							array_push($assignorData, array('rf_id'=> $rfID,'or_name'=>$name, 'exec_dt'=>$executionDate));
+							/* $executionDate = (string)$assignor->xpath('execution-date')[0]->{'date'};
+							array_push($assignorData, array('rf_id'=> $rfID,'or_name'=>$name, 'exec_dt'=>$executionDate)); */
+
+							$executionDate = getXpathValue(
+								$assignor, 
+								'execution-date', 
+								'date', 
+								null, 
+								"RF_ID: $rfID, Name: $name"
+							);
+
+							array_push($assignorData, array(
+								'rf_id' => $rfID,
+								'or_name' => $name, 
+								'exec_dt' => $executionDate
+							));
 							
 							/*if($assignor_and_assigneeID > 0) {
 								$queryUpdateInstance = 'UPDATE assignor_and_assignee SET instances = instances + 1  WHERE assignor_and_assignee_id = '.$assignor_and_assigneeID;
