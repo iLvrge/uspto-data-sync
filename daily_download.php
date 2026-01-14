@@ -90,55 +90,65 @@ try {
 
 function downloadFile($url, $path, $retry = 0)
 { 
-	echo "DOWNLOAD FILE URL: ".$url. "\n";
+    echo "DOWNLOAD FILE URL: ".$url. "\n";
     $MAX_RETRY = 5;
     $SLEEP_AFTER_429 = 1; // seconds 
-	$apiKey = getenv('USPTO_OPEN_API_KEY'); 
+    $apiKey = getenv('USPTO_OPEN_API_KEY'); 
     $headers = [
         'x-api-key: ' . $apiKey
     ];
 
-    $ch = curl_init($url);
-
-    curl_setopt_array($ch, [
-        CURLOPT_RETURNTRANSFER => true,
-        CURLOPT_FOLLOWLOCATION => true, // handle 302 redirects
-        CURLOPT_HTTPHEADER => $headers,
-        CURLOPT_HEADER => true, // get headers to check HTTP status
-    ]);
-
-    $response = curl_exec($ch);     
-    $headerSize = curl_getinfo($ch, CURLINFO_HEADER_SIZE);
-    $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-
-    $body = substr($response, $headerSize);
-
-    if (curl_errno($ch)) {
-        echo 'cURL error: ' . curl_error($ch) . "\n";
-        curl_close($ch);
+    $fullPath = dirname(__FILE__) . $path;
+    
+    // Open file handle for writing
+    $fp = fopen($fullPath, 'w+');
+    if ($fp === false) {
+        echo "Failed to open file for writing: $fullPath\n";
         return false;
     }
 
+    $ch = curl_init($url);
+
+    curl_setopt_array($ch, [
+        CURLOPT_WRITEFUNCTION => function($curl, $data) use ($fp) {
+            return fwrite($fp, $data);
+        },
+        CURLOPT_FOLLOWLOCATION => true,
+        CURLOPT_HTTPHEADER => $headers,
+        CURLOPT_TIMEOUT => 3600, // 1 hour timeout for large files
+        CURLOPT_CONNECTTIMEOUT => 30,
+        CURLOPT_HEADER => false, // Don't include headers in output
+    ]);
+
+    $result = curl_exec($ch);
+    $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    $curlError = curl_error($ch);
+    
     curl_close($ch);
+    fclose($fp);
+
+    if ($result === false) {
+        echo 'cURL error: ' . $curlError . "\n";
+        unlink($fullPath); // Clean up partial file
+        return false;
+    }
 
     if ($httpCode === 429 && $retry < $MAX_RETRY) {
         echo "429 Too Many Requests — Retrying in {$SLEEP_AFTER_429}s (attempt $retry)\n";
+        unlink($fullPath); // Clean up
         sleep($SLEEP_AFTER_429);
         return downloadFile($url, $path, $retry + 1);
     }
 
     if ($httpCode !== 200) {
         echo "HTTP error $httpCode\n";
+        unlink($fullPath); // Clean up partial file
         return false;
     }
 
-    $fullPath = dirname(__FILE__) . $path;
-    if (file_put_contents($fullPath, $body) === false) {
-        echo "Failed to save file to $fullPath\n";
-        return false;
-    }
-
+    $fileSize = filesize($fullPath);
+    echo "Download completed successfully. File size: " . number_format($fileSize) . " bytes\n";
     return true;
-} 
+}
 
 ?>
