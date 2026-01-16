@@ -93,10 +93,12 @@ function downloadFile($url, $path, $retry = 0)
     echo "DOWNLOAD FILE URL: ".$url. "\n";
     $MAX_RETRY = 5;
     $SLEEP_AFTER_429 = 1; // seconds 
-    $apiKey = getenv('USPTO_OPEN_API_KEY'); 
+    global $dotenv;
+    $apiKey = isset($dotenv['USPTO_OPEN_API_KEY']) ? $dotenv['USPTO_OPEN_API_KEY'] : getenv('USPTO_OPEN_API_KEY'); 
     $headers = [
         'x-api-key: ' . $apiKey
     ];
+
 
     $fullPath = dirname(__FILE__) . $path;
     
