@@ -8,13 +8,9 @@ ini_set('max_execution_time', 0);
 ini_set('display_errors', 1); ini_set('display_startup_errors', 1); error_reporting(E_ALL); 
 /*ignore_user_abort(true);*/
 ini_set('xdebug.max_nesting_level', 1000); 
-$host = getenv('DB_HOST');
-$user = getenv('DB_USER'); 
-$password = getenv('DB_PASSWORD');
-$dbUSPTO = getenv('DB_USPTO_DB');
-$dbBusiness = getenv('DB_BUSINESS');
-$dbApplication = getenv('DB_APPLICATION_DB');
-$con = new mysqli($host, $user, $password, $dbUSPTO);
+
+require_once __DIR__ . '/connection.php';
+
 $con->query('SET GLOBAL range_optimizer_max_mem_size=0');
 $con->query('SET global internal_tmp_mem_storage_engine=Memory;');
 $con->query('SET SESSION group_concat_max_len = 1000000;');

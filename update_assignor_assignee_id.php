@@ -87,13 +87,7 @@ if(count($allNames) > 0) {
 
 
  <?php 
-$host = getenv('DB_HOST');
-$user = getenv('DB_USER');
-$password = getenv('DB_PASSWORD');
-$dbUSPTO = getenv('DB_USPTO_DB');
-$dbBusiness = getenv('DB_BUSINESS');
-$dbApplication = getenv('DB_APPLICATION_DB');
-$con = new mysqli($host, $user, $password, $dbUSPTO);
+require_once __DIR__ . '/connection.php';
 
 if ($con->connect_errno) {
     throw new Exception('MySQL Connection failed: ' . $con->connect_error);
