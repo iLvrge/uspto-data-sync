@@ -11,6 +11,9 @@ $user = $dotenv['DB_USER'];
 $password = $dotenv['DB_PASS'];
 $dbUSPTO = $dotenv['DB_NAME'];
 
+$dbBusiness = $dotenv['DB_BUSINESS'];
+$dbApplication = $dotenv['DB_APPLICATION_DB'];
+
 // Daily Logging setup
 $logDir = __DIR__ . '/log';
 if (!is_dir($logDir)) {
