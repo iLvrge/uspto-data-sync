@@ -42,6 +42,11 @@ $trackingId = upsertDownloadTracking($con, [
 
 try {
 
+    $ddsDir = __DIR__ . '/dds';
+    if (!is_dir($ddsDir)) {
+        mkdir($ddsDir, 0777, true);
+    }
+
     while(1==1) {
         if(strtotime($startDate) <= strtotime($endDate)){
             $date = new DateTime($startDate);
@@ -59,10 +64,11 @@ try {
             break;
         }
     }
-    chdir('/var/www/html/trash/dds');
+
+    chdir($ddsDir);
     exec('find . -name "*.zip" -exec unzip -o {} \;',$output, $return);
-    chdir('/var/www/html/trash');
-    exec('find . -name "*.zip" -type f -delete');
+    chdir(__DIR__);
+    exec('find ./dds -name "*.zip" -type f -delete');
     exec('php -f update_record_daily_xml.php');
 
     // Ensure database connection is alive before updates
@@ -146,6 +152,25 @@ function downloadFile($url, $path, $retry = 0)
         echo "HTTP error $httpCode\n";
         unlink($fullPath); // Clean up partial file
         return false;
+    }
+
+    $contentType = curl_getinfo($ch, CURLINFO_CONTENT_TYPE);
+    if (strpos(strtolower($contentType), 'text/html') !== false || strpos(strtolower($contentType), 'application/json') !== false) {
+        echo "Error: Downloaded file is an HTML/JSON page (File not found on USPTO server). Content-Type: $contentType\n";
+        unlink($fullPath); // Clean up file
+        return false;
+    }
+
+    // Verify it's actually a zip file by checking first 4 bytes (PK\x03\x04)
+    $handle = fopen($fullPath, 'rb');
+    if ($handle) {
+        $header = fread($handle, 4);
+        fclose($handle);
+        if ($header !== "\x50\x4b\x03\x04") {
+            echo "Error: Downloaded file is not a valid ZIP file.\n";
+            unlink($fullPath);
+            return false;
+        }
     }
 
     $fileSize = filesize($fullPath);

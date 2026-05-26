@@ -8,11 +8,14 @@ $dotenv = parse_ini_file(__DIR__ . '/.env');
 
 $host = $dotenv['DB_HOST'];
 $user = $dotenv['DB_USER']; 
-$password = $dotenv['DB_PASS'];
-$dbUSPTO = $dotenv['DB_NAME'];
+$password = $dotenv['DB_PASS'] ?? $dotenv['DB_PASSWORD'] ?? '';
+$dbUSPTO = $dotenv['DB_NAME'] ?? $dotenv['DB_USPTO_DB'] ?? '';
 
 $dbBusiness = $dotenv['DB_BUSINESS'];
 $dbApplication = $dotenv['DB_APPLICATION_DB'];
+
+$dbAppBiblio = $dotenv['DB_APPLICATION_BIBLIO'];
+$dbGrantBiblio = $dotenv['DB_GRANT_BIBLIO'];
 
 // Daily Logging setup
 $logDir = __DIR__ . '/log';
